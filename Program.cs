@@ -46,16 +46,32 @@ namespace dr.ChromePasswordRecover
                 return;
             }
 
-            LoginReader reader = new LoginReader(dataFile);
-            var logins = reader.GetLogins(parser.Arguments.FirstOrDefault())
-                .Where(l => !String.IsNullOrEmpty(l.UserName));
-            var dumpFile = parser.GetSwitchValue(Switches.Dump);
-            if (!String.IsNullOrEmpty(dumpFile))
-                WriteAsXml(dumpFile, logins);
-            else
-                WriteToConsole(logins);
+            // Copy the file to the temp dir. In most cases, this will let us run the LoginReader even if Chrome is running.
+            string filename = Path.GetTempFileName();
+            File.Copy(dataFile, filename, true);
+            try
+            {
+                LoginReader reader = new LoginReader(filename);
+                var logins = reader.GetLogins(parser.Arguments.FirstOrDefault())
+                    .Where(l => !String.IsNullOrEmpty(l.UserName));
+                var dumpFile = parser.GetSwitchValue(Switches.Dump);
+                if (!String.IsNullOrEmpty(dumpFile))
+                    WriteAsXml(dumpFile, logins);
+                else
+                    WriteToConsole(logins);
 
-            Console.WriteLine();
+                Console.WriteLine();
+            }
+            catch 
+            {
+                // Delete the temp file to be a good citizen :-)
+                try
+                {
+                    File.Delete(filename);
+                }
+                catch (Exception) {}
+                throw;
+            }
         }
 
         /// <summary>

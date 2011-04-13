@@ -109,7 +109,7 @@ namespace dr.ChromePasswordRecover
         /// <summary>
         /// The relative file path for web data.
         /// </summary>
-        private const string dataFileRelativePath = "Google\\Chrome\\User Data\\Default\\Web Data";
+        private const string dataFileRelativePath = "Google\\Chrome\\User Data\\Default\\Login Data";
         /// <summary>
         /// Gets the default chrome password file path.
         /// </summary>
