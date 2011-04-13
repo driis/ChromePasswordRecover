@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace dr.Commons.ConsoleUtility
+namespace dr.ChromePasswordRecover.ConsoleUtility
 {
     /// <summary>
     /// Base console program class that abstracts away commonly needed functionality for console programs.

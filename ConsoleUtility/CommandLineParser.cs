@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace dr.Commons.ConsoleUtility
+namespace dr.ChromePasswordRecover.ConsoleUtility
 {
     /// <summary>
     /// Command-line parsing helper.

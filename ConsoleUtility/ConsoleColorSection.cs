@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace dr.Commons.ConsoleUtility
+namespace dr.ChromePasswordRecover.ConsoleUtility
 {
     /// <summary>
     /// USed to define a colored text section in a console.

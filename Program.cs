@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using dr.Commons.ConsoleUtility;
+using dr.ChromePasswordRecover.ConsoleUtility;
 
 namespace dr.ChromePasswordRecover
 {
