@@ -1,0 +1,16 @@
+syntax: glob
+*.force
+*.suo
+*.db4o
+*.dat
+*.user
+*.dll
+*.exe
+*.pdb
+*.FileListAbsolute.txt
+*.cache
+bin/**
+syntax: regexp
+/App_Data/
+ReSharper
+TestResults
