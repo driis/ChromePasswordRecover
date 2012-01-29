@@ -87,9 +87,9 @@ namespace dr.ChromePasswordRecover
                 new XElement("chrome-credentials-dump",
                              from url in data
                              orderby url.Key
-                             select new XElement("url", url.Key,
+                             select new XElement("url", new XAttribute("href", url.Key), 
                                                  from credential in url
-                                                 orderby credential.Preferred descending 
+                                                 orderby credential.Preferred descending
                                                  select new XElement("credential",
                                                                      new XAttribute("preferred", credential.Preferred),
                                                                      new XElement("userName",
