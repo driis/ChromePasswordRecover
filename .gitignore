@@ -1,5 +1,3 @@
-syntax: glob
-*.force
 *.suo
 *.db4o
 *.dat
@@ -10,7 +8,4 @@ syntax: glob
 *.FileListAbsolute.txt
 *.cache
 bin/**
-syntax: regexp
-/App_Data/
-ReSharper
-TestResults
+obj/**
