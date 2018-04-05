@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Data.Common;
-using System.Data.SQLite;
 
 namespace dr.ChromePasswordRecover
 {
@@ -13,13 +12,9 @@ namespace dr.ChromePasswordRecover
     public class LoginReader
     {
         /// <summary>
-        /// SQL Lite data provider.
-        /// </summary>
-        private const string DataProviderName = "System.Data.SQLite";
-        /// <summary>
         /// Connection string template.
         /// </summary>
-        private const string SQLiteConnectionString = "Data Source={0};Version=3;FailIfMissing=True";
+        private const string SQLiteConnectionString = "Data Source={0}";
         /// <summary>
         /// Provides cryptographic functions.
         /// </summary>
@@ -100,7 +95,7 @@ namespace dr.ChromePasswordRecover
         /// <returns></returns>
         private DbConnection OpenConnection()
         {
-            var conn = new SQLiteConnection(String.Format(SQLiteConnectionString, dataFile));
+            var conn = new Microsoft.Data.Sqlite.SqliteConnection(String.Format(SQLiteConnectionString, dataFile));
             conn.Open();
             return conn;
         }

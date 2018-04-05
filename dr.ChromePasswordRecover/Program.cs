@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using dr.ChromePasswordRecover.ConsoleUtility;
+using SQLitePCL;
 
 namespace dr.ChromePasswordRecover
 {
@@ -28,7 +29,9 @@ namespace dr.ChromePasswordRecover
         /// </summary>
         /// <param name="args">The args.</param>
         public override void RunProgram(string[] args)
-        {           
+        {            
+            
+            
             CommandLineParser parser = new CommandLineParser(args);            
             if ( parser.HasSwitch(Switches.Help))
             {
