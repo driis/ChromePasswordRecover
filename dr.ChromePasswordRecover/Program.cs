@@ -13,7 +13,7 @@ namespace dr.ChromePasswordRecover
     /// </summary>
     class Program : BaseProgram
     {
-        private const string format = "{0,-30} {1,-18} {2}";
+        private const string Format = "{0,-30} {1,-18} {2}";
 
         /// <summary>
         /// Main entry point for the program dr.ChromePasswordRecover
@@ -29,17 +29,15 @@ namespace dr.ChromePasswordRecover
         /// </summary>
         /// <param name="args">The args.</param>
         public override void RunProgram(string[] args)
-        {            
-            
-            
-            CommandLineParser parser = new CommandLineParser(args);            
-            if ( parser.HasSwitch(Switches.Help))
+        {
+            if ( CommandLine.HasSwitch(Switches.Help))
             {
                 DisplayUsage();
                 return;
             }
 
-            string dataFile = parser.GetSwitchValue(Switches.File);
+            var options = CommandLine.GetRecoveryOptions();
+            string dataFile = options.DataFile;
             if (dataFile == null)
                 dataFile = LoginReader.GetDefaultChromePasswordFile();
 
@@ -55,11 +53,10 @@ namespace dr.ChromePasswordRecover
             try
             {
                 LoginReader reader = new LoginReader(filename);
-                var logins = reader.GetLogins(parser.Arguments.FirstOrDefault())
+                var logins = reader.GetLogins(CommandLine.Arguments.FirstOrDefault())
                     .Where(l => !String.IsNullOrEmpty(l.UserName));
-                var dumpFile = parser.GetSwitchValue(Switches.Dump);
-                if (!String.IsNullOrEmpty(dumpFile))
-                    WriteAsXml(dumpFile, logins);
+                if (!String.IsNullOrEmpty(options.OutFile))
+                    WriteAsXml(options.OutFile, logins);
                 else
                     WriteToConsole(logins);
 
@@ -116,14 +113,14 @@ namespace dr.ChromePasswordRecover
         /// <param name="logins">The logins.</param>
         private static void WriteToConsole(IEnumerable<Login> logins)
         {
-            Console.WriteLine(format, "URL", "User name", "Password");
-            Console.WriteLine(format, new String('-',30), new String('-',18), new String('-',29));
+            Console.WriteLine(Format, "URL", "User name", "Password");
+            Console.WriteLine(Format, new String('-',30), new String('-',18), new String('-',29));
                                                            
             foreach(var url in logins.GroupBy(login => login.Url, StringComparer.OrdinalIgnoreCase).OrderBy(u => u.Key))
             {
-                Console.WriteLine(format, url.Key.Left(30,"..."), url.First().UserName.Left(18, "..."),url.First().Password);
+                Console.WriteLine(Format, url.Key.Left(30,"..."), url.First().UserName.Left(18, "..."),url.First().Password);
                 foreach(var cred in url.Skip(1))
-                    Console.WriteLine(format,null, cred.UserName.Left(18,"..."),cred.Password);
+                    Console.WriteLine(Format,null, cred.UserName.Left(18,"..."),cred.Password);
             }
         }
 
@@ -150,15 +147,17 @@ namespace dr.ChromePasswordRecover
         {
             get { return "Google Chrome Password recovery tool"; }
         }
+    }
 
-        /// <summary>
-        /// Defines available switches.
-        /// </summary>
-        private class Switches
-        {
-            public const string Help = "h";
-            public const string Dump = "d";
-            public const string File = "f";
-        }        
+    /// <summary>
+    /// Defines available switches.
+    /// </summary>
+    internal class Switches
+    {
+        public const string Help = "h";
+        public const string Dump = "d";
+        public const string File = "f";
+        public const string Format = "format";
+        public const string Pass = "p";
     }
 }
