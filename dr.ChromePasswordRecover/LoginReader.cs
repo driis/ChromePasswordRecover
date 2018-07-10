@@ -6,10 +6,15 @@ using System.Data.Common;
 
 namespace dr.ChromePasswordRecover
 {
+    public interface ILoginReader
+    {
+        IEnumerable<Login> GetLogins(string url);       
+    }
+
     /// <summary>
     /// Reads logins.
     /// </summary>
-    public class LoginReader
+    public class LoginReader : ILoginReader
     {
         /// <summary>
         /// Connection string template.
@@ -18,7 +23,7 @@ namespace dr.ChromePasswordRecover
         /// <summary>
         /// Provides cryptographic functions.
         /// </summary>
-        private static readonly CryptoAPI crypto = new CryptoAPI();
+        private static readonly CryptoApi crypto = new CryptoApi();
         /// <summary>
         /// data file location.
         /// </summary>
@@ -100,18 +105,6 @@ namespace dr.ChromePasswordRecover
             return conn;
         }
 
-        /// <summary>
-        /// The relative file path for web data.
-        /// </summary>
-        private const string dataFileRelativePath = "Google\\Chrome\\User Data\\Default\\Login Data";
-        /// <summary>
-        /// Gets the default chrome password file path.
-        /// </summary>
-        /// <returns></returns>
-        public static string GetDefaultChromePasswordFile()
-        {
-            string appDataRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            return Path.Combine(appDataRoot, dataFileRelativePath);
-        }
+        
     }
 }

@@ -7,7 +7,7 @@ namespace dr.ChromePasswordRecover
     /// <summary>
     /// A managed wrapper around the used Crypto API functions.
     /// </summary>
-    public class CryptoAPI
+    public class CryptoApi
     {
         /// <summary>
         /// Decrypts the string.

@@ -37,9 +37,10 @@ namespace dr.ChromePasswordRecover
             }
 
             var options = CommandLine.GetRecoveryOptions();
+            var composer = CompositionRoot.Current;
             string dataFile = options.DataFile;
             if (dataFile == null)
-                dataFile = LoginReader.GetDefaultChromePasswordFile();
+                dataFile = composer.DataFile.LoginData;
 
             if (!File.Exists(dataFile))
             {
@@ -52,7 +53,7 @@ namespace dr.ChromePasswordRecover
             File.Copy(dataFile, filename, true);
             try
             {
-                LoginReader reader = new LoginReader(filename);
+                ILoginReader reader = composer.
                 var logins = reader.GetLogins(CommandLine.Arguments.FirstOrDefault())
                     .Where(l => !String.IsNullOrEmpty(l.UserName));
                 if (!String.IsNullOrEmpty(options.OutFile))
