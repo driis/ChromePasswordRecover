@@ -10,7 +10,7 @@ namespace dr.ChromePasswordRecover.Windows
         /// <summary>
         /// Provides cryptographic functions.
         /// </summary>
-        private static readonly CryptoApi crypto = new CryptoApi();
+        private static readonly DataProtectionApi Crypto = new DataProtectionApi();
         
         /// <summary>
         /// Login reader constructor
@@ -25,12 +25,12 @@ namespace dr.ChromePasswordRecover.Windows
         /// </summary>
         /// <param name="logins">The logins.</param>
         /// <returns></returns>
-        protected override IEnumerable<Login> DecryptPasswords(IEnumerable<Login> logins)
+        protected override IEnumerable<PlainTextLogin> DecryptPasswords(IEnumerable<Login> logins)
         {
             foreach (var login in logins)
             {
-                login.Password = crypto.DecryptString(login.PasswordRaw);
-                yield return login;
+                string password = Crypto.DecryptString(login.EncryptedPassword);
+                yield return login.WithPassword(password);
             }
         }
     }

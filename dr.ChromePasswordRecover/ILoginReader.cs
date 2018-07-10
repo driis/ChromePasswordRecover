@@ -5,6 +5,6 @@ namespace dr.ChromePasswordRecover
 {
     public interface ILoginReader
     {
-        IEnumerable<Login> GetLogins(string url);       
+        IEnumerable<PlainTextLogin> GetLogins(string url);       
     }
 }

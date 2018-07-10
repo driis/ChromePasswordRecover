@@ -63,15 +63,17 @@ namespace dr.ChromePasswordRecover
 
                 Console.WriteLine();
             }
-            catch 
+            finally 
             {
                 // Delete the temp file to be a good citizen :-)
                 try
                 {
                     File.Delete(fileName);
                 }
-                catch (Exception) {}
-                throw;
+                catch (Exception)
+                {
+                    // ignored by design
+                }
             }
         }
 
@@ -80,7 +82,7 @@ namespace dr.ChromePasswordRecover
         /// </summary>
         /// <param name="fileName">Name of the file.</param>
         /// <param name="logins">The logins.</param>
-        private static void WriteAsXml(string fileName, IEnumerable<Login> logins)
+        private static void WriteAsXml(string fileName, IEnumerable<PlainTextLogin> logins)
         {
             Console.WriteLine("Dumping passwords to file: {0}", fileName);
             var data = logins.GroupBy(login => login.Url, StringComparer.OrdinalIgnoreCase);
@@ -112,7 +114,7 @@ namespace dr.ChromePasswordRecover
         /// Writes to console.
         /// </summary>
         /// <param name="logins">The logins.</param>
-        private static void WriteToConsole(IEnumerable<Login> logins)
+        private static void WriteToConsole(IEnumerable<PlainTextLogin> logins)
         {
             Console.WriteLine(Format, "URL", "User name", "Password");
             Console.WriteLine(Format, new String('-',30), new String('-',18), new String('-',29));

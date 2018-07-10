@@ -31,7 +31,7 @@ namespace dr.ChromePasswordRecover
         /// </summary>
         /// <param name="url">The URL.</param>
         /// <returns></returns>
-        public IEnumerable<Login> GetLogins(string url)
+        public IEnumerable<PlainTextLogin> GetLogins(string url)
         {
             url = "%" + url + "%";
             List<Login> logins = new List<Login>();
@@ -65,7 +65,7 @@ namespace dr.ChromePasswordRecover
         /// </summary>
         /// <param name="logins">The logins.</param>
         /// <returns></returns>
-        protected abstract IEnumerable<Login> DecryptPasswords(IEnumerable<Login> logins);
+        protected abstract IEnumerable<PlainTextLogin> DecryptPasswords(IEnumerable<Login> logins);
 
         /// <summary>
         /// Opens the connection.

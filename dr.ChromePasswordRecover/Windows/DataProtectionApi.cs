@@ -2,12 +2,12 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace dr.ChromePasswordRecover
+namespace dr.ChromePasswordRecover.Windows
 {
     /// <summary>
     /// A managed wrapper around the used Crypto API functions.
     /// </summary>
-    public class CryptoApi
+    public class DataProtectionApi
     {
         /// <summary>
         /// Decrypts the string.
