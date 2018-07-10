@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace dr.ChromePasswordRecover.MacOS
 {
@@ -8,7 +9,8 @@ namespace dr.ChromePasswordRecover.MacOS
         {
             get
             {
-                throw new NotImplementedException();
+                string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                return Path.Combine(home, "Library/Application Support/Google/Chrome/Default/Login Data");
             }
         }
     }

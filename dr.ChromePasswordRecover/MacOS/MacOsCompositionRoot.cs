@@ -6,7 +6,7 @@
 
         public ILoginReader LoginReader(string fileName)
         {
-            return new MacOsLoginReader();
+            return new MacOsLoginReader(fileName);
         }
     }
 }

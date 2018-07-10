@@ -3,11 +3,15 @@ using System.Collections.Generic;
 
 namespace dr.ChromePasswordRecover.MacOS
 {
-    internal class MacOsLoginReader : ILoginReader
+    public sealed class MacOsLoginReader : LoginReaderBase
     {
-        public IEnumerable<Login> GetLogins(string url)
+        protected override IEnumerable<Login> DecryptPasswords(IEnumerable<Login> logins)
         {
-            throw new NotImplementedException();
+            return logins;
+        }
+
+        public MacOsLoginReader(string path) : base(path)
+        {
         }
     }
 }
