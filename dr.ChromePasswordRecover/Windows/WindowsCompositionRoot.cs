@@ -7,7 +7,7 @@ namespace dr.ChromePasswordRecover.Windows
         public IChromeDataFile DataFile => new WindowsChromeDataFile();
         public ILoginReader LoginReader(string fileName)
         {
-            return new LoginReader(fileName);
+            return new WindowsLoginReader(fileName);
         }
     }
 }

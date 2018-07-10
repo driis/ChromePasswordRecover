@@ -1,20 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Data.Common;
 
-namespace dr.ChromePasswordRecover
+namespace dr.ChromePasswordRecover.Windows
 {
-    public interface ILoginReader
-    {
-        IEnumerable<Login> GetLogins(string url);       
-    }
-
     /// <summary>
     /// Reads logins.
     /// </summary>
-    public class LoginReader : ILoginReader
+    public class WindowsLoginReader : ILoginReader
     {
         /// <summary>
         /// Connection string template.
@@ -32,18 +26,9 @@ namespace dr.ChromePasswordRecover
         /// Login reader constructor
         /// </summary>
         /// <param name="path">The path.</param>
-        public LoginReader(string path)
+        public WindowsLoginReader(string path)
         {
             dataFile = path;
-        }
-
-        /// <summary>
-        /// Gets the logins.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<Login> GetLogins()
-        {
-            return GetLogins(null);
         }
 
         /// <summary>
@@ -74,7 +59,7 @@ namespace dr.ChromePasswordRecover
                     var passwordBuffer = reader.GetValue(1) as byte[];
                     logins.Add(
                         new Login(reader.GetString(0), passwordBuffer ,reader.GetString(2), reader.GetBoolean(3))
-                        );
+                    );
                 }
             }
             return DecryptPasswords(logins);
