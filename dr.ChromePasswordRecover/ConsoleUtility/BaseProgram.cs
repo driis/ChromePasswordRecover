@@ -57,7 +57,7 @@ namespace dr.ChromePasswordRecover.ConsoleUtility
         /// <typeparam name="T"></typeparam>
         /// <param name="constructor">The constructor.</param>
         /// <param name="args">The args.</param>
-        public static void Main<T>(Func<T> constructor, string [] args)
+        public static void MainEntryPoint<T>(Func<T> constructor, string [] args)
             where T : BaseProgram
         {
             try

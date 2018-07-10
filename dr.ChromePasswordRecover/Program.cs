@@ -21,7 +21,7 @@ namespace dr.ChromePasswordRecover
         /// <param name="args">Command-line arguments</param>
         static void Main(string[] args)
         {
-            Main(() => new Program(), args);
+            MainEntryPoint(() => new Program(), args);
         }
 
         /// <summary>

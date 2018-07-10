@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.IO;
+using Xunit;
 
 namespace dr.ChromePasswordRecover.Tests
 {    
@@ -12,6 +13,13 @@ namespace dr.ChromePasswordRecover.Tests
 
         [Fact]
         public void CanGetLoginReader()
+        {
+            var reader = CompositionRoot.Current.LoginReader(Path.GetTempFileName());
+            Assert.NotNull(reader);
+        }
+
+        [Fact]
+        public void CanGetDataFile()
         {
             var dataFile = CompositionRoot.Current.DataFile;
             Assert.NotNull(dataFile);
