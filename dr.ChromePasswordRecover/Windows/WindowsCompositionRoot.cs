@@ -5,9 +5,9 @@ namespace dr.ChromePasswordRecover.Windows
     class WindowsCompositionRoot : ICompositionRoot
     {
         public IChromeDataFile DataFile => new WindowsChromeDataFile();
-        public ILoginReader LoginReader(string fileName)
+        public ILoginReader LoginReader(string fileName, string password = null)
         {
-            return new WindowsLoginReader(fileName);
+            return new LoginReader(fileName, new DataProtectionApi());
         }
     }
 }

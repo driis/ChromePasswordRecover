@@ -2,23 +2,28 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 
 namespace dr.ChromePasswordRecover
 {
-    public abstract class LoginReaderBase : ILoginReader
+    public class LoginReader : ILoginReader
     {
         /// <summary>
         /// data file location.
         /// </summary>
         private readonly string _dataFile;
-        
+
+        private readonly ICrypto _crypto;
+
         /// <summary>
         /// Login reader constructor
         /// </summary>
         /// <param name="path">The path.</param>
-        public LoginReaderBase(string path)
+        /// <param name="crypto">Cryptographic implementation</param>
+        public LoginReader(string path,  ICrypto crypto)
         {
             _dataFile = path;
+            _crypto = crypto;
         }
 
         /// <summary>
@@ -34,7 +39,6 @@ namespace dr.ChromePasswordRecover
         public IEnumerable<PlainTextLogin> GetLogins(string url)
         {
             url = "%" + url + "%";
-            List<Login> logins = new List<Login>();
             using(var conn = OpenConnection())
             {
                 var command = conn.CreateCommand();
@@ -48,24 +52,26 @@ namespace dr.ChromePasswordRecover
                     "SELECT username_value, password_value, origin_url as Url, preferred FROM logins WHERE blacklisted_by_user = 0 AND Url LIKE @url";
                 command.Parameters.Add(urlParam);
                 var reader = command.ExecuteReader();
-                
-                while(reader.Read())
-                {
-                    var passwordBuffer = reader.GetValue(1) as byte[];
-                    logins.Add(
-                        new Login(reader.GetString(0), passwordBuffer ,reader.GetString(2), reader.GetBoolean(3))
-                    );
-                }
+
+                return LoginsFromReader(reader).ToArray();
             }
-            return DecryptPasswords(logins);
         }
 
-        /// <summary>
-        /// Decrypts the passwords.
-        /// </summary>
-        /// <param name="logins">The logins.</param>
-        /// <returns></returns>
-        protected abstract IEnumerable<PlainTextLogin> DecryptPasswords(IEnumerable<Login> logins);
+        private IEnumerable<PlainTextLogin> LoginsFromReader(DbDataReader reader)
+        {
+            while (reader.Read())
+            {
+                var passwordBuffer = reader.GetValue(1) as byte[];
+                string password = _crypto.DecryptString(passwordBuffer);
+                yield return new PlainTextLogin(
+                    reader.GetString(0), 
+                    passwordBuffer, 
+                    reader.GetString(2),
+                    reader.GetBoolean(3), 
+                    password);
+
+            }
+        }
 
         /// <summary>
         /// Opens the connection.

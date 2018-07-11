@@ -8,7 +8,7 @@ namespace dr.ChromePasswordRecover
     public interface ICompositionRoot
     {
         IChromeDataFile DataFile { get; }
-        ILoginReader LoginReader(string fileName);
+        ILoginReader LoginReader(string fileName, string password = null);
     }
 
     public static class CompositionRoot

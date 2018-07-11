@@ -12,3 +12,4 @@
 .vs/
 .idea/
 packages/
+*.sql
