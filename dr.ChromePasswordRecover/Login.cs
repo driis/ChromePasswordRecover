@@ -14,7 +14,7 @@ namespace dr.ChromePasswordRecover
         /// <param name="encryptedPassword">The password raw.</param>
         /// <param name="url">The URL.</param>
         /// <param name="preferred">Preferred lign?</param>
-        public Login(string userName, byte[] encryptedPassword, string url, bool preferred)
+        public Login(string userName, Memory<byte> encryptedPassword, string url, bool preferred)
         {
             UserName = userName;
             EncryptedPassword = encryptedPassword;
@@ -32,7 +32,7 @@ namespace dr.ChromePasswordRecover
         /// Gets or sets the password raw.
         /// </summary>
         /// <value>The password raw.</value>
-        public byte[] EncryptedPassword { get; }
+        public Memory<byte> EncryptedPassword { get; }
 
         /// <summary>
         /// Gets or sets the URL.
@@ -54,28 +54,6 @@ namespace dr.ChromePasswordRecover
         public override string ToString()
         {
             return String.Format("{0} @ {1}", UserName, Url);
-        }
-    }
-
-    public class PlainTextLogin : Login
-    {
-        public PlainTextLogin(string userName, byte[] encryptedPassword, string url, bool preferred, string password) : base(userName, encryptedPassword, url, preferred)
-        {
-            Password = password;
-        }
-
-        /// <summary>
-        /// Gets or sets the password.
-        /// </summary>
-        /// <value>The password.</value>
-        public string Password { get; }
-    }
-
-    public static class PlainTextLoginExtension
-    {
-        public static PlainTextLogin WithPassword(this Login login, string plainTextPassword)
-        {
-            return new PlainTextLogin(login.UserName, login.EncryptedPassword, login.Url, login.Preferred, plainTextPassword);
         }
     }
 }

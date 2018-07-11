@@ -10,7 +10,7 @@ namespace dr.ChromePasswordRecover.Windows
         /// <summary>
         /// Provides cryptographic functions.
         /// </summary>
-        private static readonly DataProtectionApi Crypto = new DataProtectionApi();
+        private readonly ICrypto Crypto = new DataProtectionApi();
         
         /// <summary>
         /// Login reader constructor

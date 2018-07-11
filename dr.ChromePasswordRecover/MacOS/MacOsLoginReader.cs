@@ -6,13 +6,21 @@ namespace dr.ChromePasswordRecover.MacOS
 {
     public sealed class MacOsLoginReader : LoginReaderBase
     {
-        protected override IEnumerable<PlainTextLogin> DecryptPasswords(IEnumerable<Login> logins)
+        private Memory<byte> _password = null;
+
+        public MacOsLoginReader(string path, Memory<byte> password)
+            : this(path)
         {
-            return logins.Select(x => x.WithPassword("password"));
+            _password = password;
         }
 
         public MacOsLoginReader(string path) : base(path)
         {
+        }
+
+        protected override IEnumerable<PlainTextLogin> DecryptPasswords(IEnumerable<Login> logins)
+        {
+            return logins.Select(x => x.WithPassword("password"));
         }
     }
 }

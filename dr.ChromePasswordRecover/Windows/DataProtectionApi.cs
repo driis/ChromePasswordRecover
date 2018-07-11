@@ -7,14 +7,14 @@ namespace dr.ChromePasswordRecover.Windows
     /// <summary>
     /// A managed wrapper around the used Crypto API functions.
     /// </summary>
-    public class DataProtectionApi
+    public class DataProtectionApi : ICrypto
     {
         /// <summary>
         /// Decrypts the string.
         /// </summary>
         /// <param name="cipherText">The cipher text.</param>
         /// <returns></returns>
-        public string DecryptString(byte [] cipherText)
+        public string DecryptString(Memory<byte> cipherText)
         {
             byte [] plainText = Decrypt(cipherText);
             return Encoding.UTF8.GetString(plainText);
@@ -25,12 +25,9 @@ namespace dr.ChromePasswordRecover.Windows
         /// </summary>
         /// <param name="cipherText">The cipher text.</param>
         /// <returns></returns>
-        public byte[] Decrypt(byte [] cipherText)
+        public byte[] Decrypt(Memory<byte> cipherText)
         {
-            if (cipherText == null)
-                throw new ArgumentNullException("cipherText");
-
-            return ProtectedData.Unprotect(cipherText, null, DataProtectionScope.CurrentUser);
+            return ProtectedData.Unprotect(cipherText.ToArray(), null, DataProtectionScope.CurrentUser);
         }      
     }
 }
