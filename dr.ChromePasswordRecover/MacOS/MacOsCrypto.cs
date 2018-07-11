@@ -1,18 +1,28 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace dr.ChromePasswordRecover.MacOS
 {
     public class MacOsCrypto : ICrypto
     {
         private static readonly Regex RegPassword = new Regex("^password: \"(.*?)\"$", RegexOptions.Compiled);
-        private string _password;
-
+        private string _password = null;
+        private byte[] _encryptionKey = null;
+        private static readonly Aes Aes = Aes.Create();
+        private static readonly byte[] Salt = Encoding.ASCII.GetBytes("saltysalt");
+        private static readonly byte[] Iv = new byte[16] {20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20};
+        private static int Iterations = 1003;
+        
         public MacOsCrypto(string password)
         {
             _password = password;
+            Aes.Padding = PaddingMode.None;
         }
 
         public string DecryptString(Memory<byte> data)
@@ -22,7 +32,26 @@ namespace dr.ChromePasswordRecover.MacOS
                 _password = AskForPasswordFromKeyChain();
             }
 
-            return _password;
+            if (_encryptionKey == null)
+            {
+                _encryptionKey = KeyDerivation.Pbkdf2(_password, Salt,
+                    KeyDerivationPrf.HMACSHA1, Iterations, 16);
+            }
+
+            using (var decryptor = Aes.CreateDecryptor(_encryptionKey, Iv))
+            {
+                int blocks = data.Length / decryptor.InputBlockSize;                           
+                blocks = blocks + (data.Length % decryptor.InputBlockSize == 0 ? 0 : 1);
+                byte[] buffer = new byte[blocks * decryptor.InputBlockSize];
+                data.CopyTo(buffer);
+                using(var input = new MemoryStream(buffer))
+                using(var cryptoStream = new CryptoStream(input, decryptor, CryptoStreamMode.Read))
+                using(var reader = new StreamReader(cryptoStream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+
         }
 
         private string AskForPasswordFromKeyChain()
