@@ -4,6 +4,6 @@ namespace dr.ChromePasswordRecover
 {
     public interface ICrypto
     {
-        string DecryptString(Memory<byte> data);
+        string DecryptString(Memory<byte> secret);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -11,21 +10,24 @@ namespace dr.ChromePasswordRecover.MacOS
 {
     public class MacOsCrypto : ICrypto
     {
+        private const byte PaddingChar = 8;
         private static readonly Regex RegPassword = new Regex("^password: \"(.*?)\"$", RegexOptions.Compiled);
         private string _password = null;
         private byte[] _encryptionKey = null;
         private static readonly Aes Aes = Aes.Create();
         private static readonly byte[] Salt = Encoding.ASCII.GetBytes("saltysalt");
-        private static readonly byte[] Iv = new byte[16] {20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20};
+        private static readonly byte[] Iv = {0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20};
         private static int Iterations = 1003;
-        
+        private static readonly Memory<byte> Version = Encoding.ASCII.GetBytes("v10"); 
         public MacOsCrypto(string password)
         {
             _password = password;
+            Aes.BlockSize = 128;
+            Aes.Mode = CipherMode.CBC;
             Aes.Padding = PaddingMode.None;
         }
 
-        public string DecryptString(Memory<byte> data)
+        public string DecryptString(Memory<byte> secret)
         {
             if (_password == null)
             {
@@ -38,20 +40,22 @@ namespace dr.ChromePasswordRecover.MacOS
                     KeyDerivationPrf.HMACSHA1, Iterations, 16);
             }
 
+            var inputBuffer = secret.Span;
+            if (!inputBuffer.StartsWith(Version.Span))
+                return null;    // Not something we understand
+            inputBuffer = inputBuffer.Slice(Version.Length);
+            var outputBuffer = new Span<byte>(new byte[inputBuffer.Length]);
+            
             using (var decryptor = Aes.CreateDecryptor(_encryptionKey, Iv))
+            using(var input = new MemoryStream(inputBuffer.ToArray()))
+            using(var cryptoStream = new CryptoStream(input, decryptor, CryptoStreamMode.Read))
             {
-                int blocks = data.Length / decryptor.InputBlockSize;                           
-                blocks = blocks + (data.Length % decryptor.InputBlockSize == 0 ? 0 : 1);
-                byte[] buffer = new byte[blocks * decryptor.InputBlockSize];
-                data.CopyTo(buffer);
-                using(var input = new MemoryStream(buffer))
-                using(var cryptoStream = new CryptoStream(input, decryptor, CryptoStreamMode.Read))
-                using(var reader = new StreamReader(cryptoStream))
-                {
-                    return reader.ReadToEnd();
-                }
+                cryptoStream.Read(outputBuffer);
+                int unpaddedLength = outputBuffer.IndexOf(PaddingChar);
+                if (unpaddedLength > 0)     // -1 if original password not padded, e.g. fit a block exactly
+                    outputBuffer = outputBuffer.Slice(0, unpaddedLength);
+                return Encoding.UTF8.GetString(outputBuffer);
             }
-
         }
 
         private string AskForPasswordFromKeyChain()

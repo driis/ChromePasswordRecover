@@ -12,11 +12,11 @@ namespace dr.ChromePasswordRecover.Windows
         /// <summary>
         /// Decrypts the string.
         /// </summary>
-        /// <param name="cipherText">The cipher text.</param>
+        /// <param name="secret">The cipher text.</param>
         /// <returns></returns>
-        public string DecryptString(Memory<byte> cipherText)
+        public string DecryptString(Memory<byte> secret)
         {
-            byte [] plainText = Decrypt(cipherText);
+            byte [] plainText = Decrypt(secret);
             return Encoding.UTF8.GetString(plainText);
         }
 
