@@ -7,8 +7,9 @@
 *.pdb
 *.FileListAbsolute.txt
 *.cache
-bin/**
-obj/**
+*/bin/**
+*/obj/**
 .vs/
 .idea/
 packages/
+*.sql

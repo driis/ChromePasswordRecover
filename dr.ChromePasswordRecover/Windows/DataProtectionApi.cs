@@ -2,21 +2,21 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace dr.ChromePasswordRecover
+namespace dr.ChromePasswordRecover.Windows
 {
     /// <summary>
     /// A managed wrapper around the used Crypto API functions.
     /// </summary>
-    public class CryptoAPI
+    public class DataProtectionApi : ICrypto
     {
         /// <summary>
         /// Decrypts the string.
         /// </summary>
-        /// <param name="cipherText">The cipher text.</param>
+        /// <param name="secret">The cipher text.</param>
         /// <returns></returns>
-        public string DecryptString(byte [] cipherText)
+        public string DecryptString(Memory<byte> secret)
         {
-            byte [] plainText = Decrypt(cipherText);
+            byte [] plainText = Decrypt(secret);
             return Encoding.UTF8.GetString(plainText);
         }
 
@@ -25,12 +25,9 @@ namespace dr.ChromePasswordRecover
         /// </summary>
         /// <param name="cipherText">The cipher text.</param>
         /// <returns></returns>
-        public byte[] Decrypt(byte [] cipherText)
+        public byte[] Decrypt(Memory<byte> cipherText)
         {
-            if (cipherText == null)
-                throw new ArgumentNullException("cipherText");
-
-            return ProtectedData.Unprotect(cipherText, null, DataProtectionScope.CurrentUser);
+            return ProtectedData.Unprotect(cipherText.ToArray(), null, DataProtectionScope.CurrentUser);
         }      
     }
 }
