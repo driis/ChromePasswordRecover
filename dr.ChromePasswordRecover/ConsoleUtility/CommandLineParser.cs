@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace dr.ChromePasswordRecover.ConsoleUtility
@@ -13,7 +12,7 @@ namespace dr.ChromePasswordRecover.ConsoleUtility
         /// <summary>
         /// Prefixes for switches.
         /// </summary>
-        private readonly char[] switchPrefixes = new[] {'-', '/'};
+        private readonly char[] switchPrefixes = {'-', '/'};
         /// <summary>
         /// The arguments as received in the constructor
         /// </summary>
@@ -56,16 +55,6 @@ namespace dr.ChromePasswordRecover.ConsoleUtility
         }
 
         /// <summary>
-        /// Gets the argument.
-        /// </summary>
-        /// <param name="argumentIndex">Index of the argument.</param>
-        /// <returns></returns>
-        public string GetArgument(int argumentIndex)
-        {
-            return Arguments.Skip(argumentIndex).FirstOrDefault();
-        }
-
-        /// <summary>
         /// Determines whether the specified switch name has switch.
         /// </summary>
         /// <param name="switchName">Name of the switch.</param>
@@ -95,23 +84,6 @@ namespace dr.ChromePasswordRecover.ConsoleUtility
             return parts[1];
         }
 
-        /// <summary>
-        /// Gets all the files specified on the command line.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<FileInfo> GetFiles()
-        {
-            var specs = from arg in Arguments
-                        let dirPart = Path.GetDirectoryName(arg)
-                        select
-                            new
-                                {
-                                    file = Path.GetFileName(arg),
-                                    directory = String.IsNullOrEmpty(dirPart) ? Environment.CurrentDirectory : dirPart
-                                };
-            var files = specs.SelectMany(s => Directory.GetFiles(s.directory, s.file)).Where(File.Exists);
-            return files.Select(f => new FileInfo(f));
-        }
         /// <summary>
         /// Gets the named switch.
         /// </summary>

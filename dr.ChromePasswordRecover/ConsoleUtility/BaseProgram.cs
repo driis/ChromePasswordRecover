@@ -13,7 +13,7 @@ namespace dr.ChromePasswordRecover.ConsoleUtility
         /// <summary>
         /// Command line.
         /// </summary>
-        private LazyField<CommandLineParser> commandLine;        
+        private Lazy<CommandLineParser> _commandLine;        
 
         /// <summary>
         /// Gets the author name.
@@ -57,7 +57,7 @@ namespace dr.ChromePasswordRecover.ConsoleUtility
         /// <typeparam name="T"></typeparam>
         /// <param name="constructor">The constructor.</param>
         /// <param name="args">The args.</param>
-        public static void Main<T>(Func<T> constructor, string [] args)
+        public static void MainEntryPoint<T>(Func<T> constructor, string [] args)
             where T : BaseProgram
         {
             try
@@ -66,7 +66,7 @@ namespace dr.ChromePasswordRecover.ConsoleUtility
                     throw new ArgumentNullException("constructor");
                 
                 var program = constructor();
-                program.commandLine = LazyField.Get(() => new CommandLineParser(args));
+                program._commandLine = new Lazy<CommandLineParser>(() => new CommandLineParser(args));
                 program.DisplayCopyright();
                 program.RunProgram(args);
             }
@@ -154,9 +154,6 @@ namespace dr.ChromePasswordRecover.ConsoleUtility
         /// Gets the command line.
         /// </summary>
         /// <value>The command line.</value>
-        public CommandLineParser CommandLine
-        {
-            get { return commandLine; }
-        }
+        public CommandLineParser CommandLine => _commandLine.Value;
     }    
 }

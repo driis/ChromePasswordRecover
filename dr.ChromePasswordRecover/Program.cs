@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using dr.ChromePasswordRecover.ConsoleUtility;
+using SQLitePCL;
 
 namespace dr.ChromePasswordRecover
 {
@@ -12,7 +13,7 @@ namespace dr.ChromePasswordRecover
     /// </summary>
     class Program : BaseProgram
     {
-        private const string format = "{0,-30} {1,-18} {2}";
+        private const string Format = "{0,-30} {1,-18} {2}";
 
         /// <summary>
         /// Main entry point for the program dr.ChromePasswordRecover
@@ -20,7 +21,7 @@ namespace dr.ChromePasswordRecover
         /// <param name="args">Command-line arguments</param>
         static void Main(string[] args)
         {
-            Main(() => new Program(), args);
+            MainEntryPoint(() => new Program(), args);
         }
 
         /// <summary>
@@ -28,17 +29,18 @@ namespace dr.ChromePasswordRecover
         /// </summary>
         /// <param name="args">The args.</param>
         public override void RunProgram(string[] args)
-        {           
-            CommandLineParser parser = new CommandLineParser(args);            
-            if ( parser.HasSwitch(Switches.Help))
+        {
+            if ( CommandLine.HasSwitch(Switches.Help))
             {
                 DisplayUsage();
                 return;
             }
 
-            string dataFile = parser.GetSwitchValue(Switches.File);
+            var options = CommandLine.GetRecoveryOptions();
+            var composer = CompositionRoot.Current;
+            string dataFile = options.DataFile;
             if (dataFile == null)
-                dataFile = LoginReader.GetDefaultChromePasswordFile();
+                dataFile = composer.DataFile.LoginData;
 
             if (!File.Exists(dataFile))
             {
@@ -47,30 +49,31 @@ namespace dr.ChromePasswordRecover
             }
 
             // Copy the file to the temp dir. In most cases, this will let us run the LoginReader even if Chrome is running.
-            string filename = Path.GetTempFileName();
-            File.Copy(dataFile, filename, true);
+            string fileName = Path.GetTempFileName();
+            File.Copy(dataFile, fileName, true);
             try
             {
-                LoginReader reader = new LoginReader(filename);
-                var logins = reader.GetLogins(parser.Arguments.FirstOrDefault())
+                ILoginReader reader = composer.LoginReader(fileName);
+                var logins = reader.GetLogins(CommandLine.Arguments.FirstOrDefault())
                     .Where(l => !String.IsNullOrEmpty(l.UserName));
-                var dumpFile = parser.GetSwitchValue(Switches.Dump);
-                if (!String.IsNullOrEmpty(dumpFile))
-                    WriteAsXml(dumpFile, logins);
+                if (!String.IsNullOrEmpty(options.OutFile))
+                    WriteAsXml(options.OutFile, logins);
                 else
                     WriteToConsole(logins);
 
                 Console.WriteLine();
             }
-            catch 
+            finally 
             {
                 // Delete the temp file to be a good citizen :-)
                 try
                 {
-                    File.Delete(filename);
+                    File.Delete(fileName);
                 }
-                catch (Exception) {}
-                throw;
+                catch (Exception)
+                {
+                    // ignored by design
+                }
             }
         }
 
@@ -79,7 +82,7 @@ namespace dr.ChromePasswordRecover
         /// </summary>
         /// <param name="fileName">Name of the file.</param>
         /// <param name="logins">The logins.</param>
-        private static void WriteAsXml(string fileName, IEnumerable<Login> logins)
+        private static void WriteAsXml(string fileName, IEnumerable<PlainTextLogin> logins)
         {
             Console.WriteLine("Dumping passwords to file: {0}", fileName);
             var data = logins.GroupBy(login => login.Url, StringComparer.OrdinalIgnoreCase);
@@ -111,16 +114,16 @@ namespace dr.ChromePasswordRecover
         /// Writes to console.
         /// </summary>
         /// <param name="logins">The logins.</param>
-        private static void WriteToConsole(IEnumerable<Login> logins)
+        private static void WriteToConsole(IEnumerable<PlainTextLogin> logins)
         {
-            Console.WriteLine(format, "URL", "User name", "Password");
-            Console.WriteLine(format, new String('-',30), new String('-',18), new String('-',29));
+            Console.WriteLine(Format, "URL", "User name", "Password");
+            Console.WriteLine(Format, new String('-',30), new String('-',18), new String('-',29));
                                                            
             foreach(var url in logins.GroupBy(login => login.Url, StringComparer.OrdinalIgnoreCase).OrderBy(u => u.Key))
             {
-                Console.WriteLine(format, url.Key.Left(30,"..."), url.First().UserName.Left(18, "..."),url.First().Password);
+                Console.WriteLine(Format, url.Key.Left(30,"..."), url.First().UserName.Left(18, "..."),url.First().Password);
                 foreach(var cred in url.Skip(1))
-                    Console.WriteLine(format,null, cred.UserName.Left(18,"..."),cred.Password);
+                    Console.WriteLine(Format,null, cred.UserName.Left(18,"..."),cred.Password);
             }
         }
 
@@ -147,15 +150,17 @@ namespace dr.ChromePasswordRecover
         {
             get { return "Google Chrome Password recovery tool"; }
         }
+    }
 
-        /// <summary>
-        /// Defines available switches.
-        /// </summary>
-        private class Switches
-        {
-            public const string Help = "h";
-            public const string Dump = "d";
-            public const string File = "f";
-        }        
+    /// <summary>
+    /// Defines available switches.
+    /// </summary>
+    internal class Switches
+    {
+        public const string Help = "h";
+        public const string Dump = "d";
+        public const string File = "f";
+        public const string Format = "format";
+        public const string Pass = "p";
     }
 }
