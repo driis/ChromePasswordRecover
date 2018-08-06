@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using System.Linq;
 
 namespace dr.ChromePasswordRecover.MacOS
 {
@@ -29,16 +30,7 @@ namespace dr.ChromePasswordRecover.MacOS
 
         public string DecryptString(Memory<byte> secret)
         {
-            if (_password == null)
-            {
-                _password = AskForPasswordFromKeyChain();
-            }
-
-            if (_encryptionKey == null)
-            {
-                _encryptionKey = KeyDerivation.Pbkdf2(_password, Salt,
-                    KeyDerivationPrf.HMACSHA1, Iterations, 16);
-            }
+            EnsureKey();
 
             var inputBuffer = secret.Span;
             if (!inputBuffer.StartsWith(Version.Span))
@@ -55,6 +47,50 @@ namespace dr.ChromePasswordRecover.MacOS
                 if (unpaddedLength > 0)     // -1 if original password not padded, e.g. fit a block exactly
                     outputBuffer = outputBuffer.Slice(0, unpaddedLength);
                 return Encoding.UTF8.GetString(outputBuffer);
+            }
+        }
+
+        public Memory<byte> EncryptString(string value)
+        {
+            EnsureKey();
+            
+            var plainText = PaddedPlainTextBuffer(value);
+            byte[] outputBuffer = new byte[plainText.Length + Version.Length];
+            // ReSharper disable once ImpureMethodCallOnReadonlyValueField
+            Version.CopyTo(outputBuffer);
+            using (var encryptor = Aes.CreateEncryptor(_encryptionKey, Iv))
+            using(var output = new MemoryStream(outputBuffer, Version.Length, plainText.Length))
+            using(var cryptoStream = new CryptoStream(output, encryptor, CryptoStreamMode.Write))
+            {               
+                cryptoStream.Write(plainText);
+            }
+            return outputBuffer;
+        }
+
+        private static Span<byte> PaddedPlainTextBuffer(string value)
+        {
+            Span<byte> data = Encoding.UTF8.GetBytes(value);
+            var blockSizeBytes = Aes.BlockSize / 8;
+            var lastBlockSize = data.Length % blockSizeBytes;
+            int pad = lastBlockSize > 0 ? blockSizeBytes - lastBlockSize : 0;
+            var buffer = new Span<byte>(new byte[data.Length + pad]);
+            buffer.Fill(PaddingChar);
+            data.CopyTo(buffer);
+            data = buffer;
+            return data;
+        }
+
+        private void EnsureKey()
+        {
+            if (_password == null)
+            {
+                _password = AskForPasswordFromKeyChain();
+            }
+
+            if (_encryptionKey == null)
+            {
+                _encryptionKey = KeyDerivation.Pbkdf2(_password, Salt,
+                    KeyDerivationPrf.HMACSHA1, Iterations, 16);
             }
         }
 
