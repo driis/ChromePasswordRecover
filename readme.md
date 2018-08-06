@@ -51,4 +51,3 @@ Dump data to an XML file:
 ```
 cprecover.exe -d:passwords.xml
 ```
-  
