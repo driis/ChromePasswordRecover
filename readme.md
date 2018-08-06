@@ -14,6 +14,13 @@ For OS X it is important to note:
 * The app will ask for permission to read the encryption password from the Keychain. Needless to
 say, you will need to allow this for the program to work. Alternatively, you may pass the password on the commandline using the `password:` switch.
 
+The OS X decryption code was heavily influenced by [this helpful article](http://docs.ioin.in/writeup/bufferovernoah.com/_2016_10_17_chrome_/index.html)
+
+### Does this demonstrate a vulnerability in Chrome ? 
+Absolutely not. All this do is utilize your currently authenticated user (and keychain access for OS X) in order
+to provide you with _your own data_ in a more helpful format than Chrome allows you to. If you don't have access to the Windows user account / OS X Keychain,
+you also don't have access to the data this app provides.
+
 ### Building
 Assuming you have .NET Core 2.1 installed, you should be able to do:
 ```
